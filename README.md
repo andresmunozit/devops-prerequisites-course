@@ -115,7 +115,9 @@ UBUNTU_CODENAME=jammy
 
 ```
 
-Package Managers. Required for installing various pieces of software like web servers, db servers, DevOps tools, etc
+### Package Management
+Package managers are equired for installing various pieces of software like web servers, db servers,
+DevOps tools, etc
 ```
 # Centos uses RPM (Red Hat Package Manager), to install .rpm bundle packages
 
@@ -183,9 +185,9 @@ $ yum install ansible-2.4.2.0
 
 ```
 
-Services in Linux. Services run in the background all the time
-automatically even after a service reboot. Also the must follow
-the right order to startup:
+### Service Management
+Services run in the background all the time automatically even after a service reboot. Also they
+must follow the right order to startup:
 ```
 # To start a service, in this case the HTTPD service
 $ service httpd start
@@ -308,13 +310,184 @@ WantedBy=multi-user.target
 
 ```
 
+Example of the Service Unit File for Docker:
+```
+$ sudo cat /lib/systemd/system/docker.service 
+[sudo] password for andres: 
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network-online.target docker.socket firewalld.service containerd.service time-set.target
+Wants=network-online.target containerd.service
+Requires=docker.socket
+
+[Service]
+Type=notify
+# the default is not to use systemd for cgroups because the delegate issues still
+# exists and systemd currently does not support the cgroup feature set required
+# for containers run by docker
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+ExecReload=/bin/kill -s HUP $MAINPID
+TimeoutStartSec=0
+RestartSec=2
+Restart=always
+
+# Note that StartLimit* options were moved from "Service" to "Unit" in systemd 229.
+# Both the old, and new location are accepted by systemd 229 and up, so using the old location
+# to make them work for either version of systemd.
+StartLimitBurst=3
+
+# Note that StartLimitInterval was renamed to StartLimitIntervalSec in systemd 230.
+# Both the old, and new name are accepted by systemd 230 and up, so using the old name to make
+# this option work for either version of systemd.
+StartLimitInterval=60s
+
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNPROC=infinity
+LimitCORE=infinity
+
+# Comment TasksMax if your systemd version does not support it.
+# Only systemd 226 and above support this option.
+TasksMax=infinity
+
+# set delegate yes so that systemd does not reset the cgroups of docker containers
+Delegate=yes
+
+# kill only the docker process, not all processes in the cgroup
+KillMode=process
+OOMScoreAdjust=-500
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
 ### VI Editor
-### Package Management
-### Service Management
+There are another CLI text editors like `vim` or `nano`, in this course we will focus on `vi`. CLI
+text editors are very useful when manipulating configuration files.
+```
+# This will open the specified file with vi
+$ vi index.html
+
+```
+
+`vi` has two modes of operation:
+- **Command Mode:** This is the default mode when we open a file using vi. In this mode we can issue
+commands to the editor like copying and pasting a line or moving through the file, but we can not
+write content to the file.
+- **Insert Mode:** Allow us to write content on the file. To switch to Insert Mode type `s`. To get
+back to the Command Mode use `Esc`.
+
+#### Command mode
+```
+# For moving around through the editor you could use:
+# Keyboard arrows
+  ↑
+← ↓ →
+
+# Keys
+  K
+H J L
+
+# Deleting:
+# One character
+x
+
+# The entire line
+dd
+
+# Copying an entire line
+yy
+
+# Pasting
+p
+
+# For mioving the page (scrolling) up or down
+CTRL+u ; CTRL+d
+
+# For getting the command prompt
+:
+
+# For saving changes made to a file and save the file to disk. We can also specify an optional
+# filename
+:w
+:w filename
+
+# To discard the unsaved changes and quit
+:q
+
+# To save changes and quit
+:wq
+
+# For finding the text 'of', all the occurrences of this word will be highlighted
+/of
+
+# To move the cursor to the next occurrence
+n
+
+```
 
 ## SETUP LAB ENVIRONMENT
+We have two options for this task, using a local environment (laptop or PC), or using a cloud
+environment. We will review a locall implementation since it give us more independency regarding
+permissions and other configurations that will require additional dependencies in the cloud.
+
+The advantage of using VMs over a local machine is that we could install different dependencies
+required for a specific deployment, without affecting the performance of the local machine.
+
+### Virtualization Software / Hypervisors
+A software that can be used to create VMs.
+
+#### Type 1
+- They are installed directly on bare metal
+- The VMs are created on it
+- These are used in enterprises and production environments where you need to create a large
+amount of VMs, so they have high resource requirements.
+- They are expensive
+- Examples:
+   - vmware ESXi
+   - Microsoft Hyper-v
+
+#### Type 2
+- These are installed in an existing operating system (host OS) instead of direcly on bare metal
+- Examples:
+   - VirtualBox
+   - VMWare Workstation
+- Comparison:
+   - VirtualBox
+      - Free
+      - OpenSource
+      - Install Anywhere - Windows, Linux, MAC
+      - Snapshots & Clones
+      - Run Multiple VMs
+      - Networking (can create separated networks for different groups of VMs)
+   - VMWare Workstation
+      - Commercial
+      - Install Anywhere - Windows, Linux
+      - Snapshots & Clones
+      - VMWare Player (free version):
+         - Free
+         - Windows / Linux
+         - One VM at a time
+         - No Snapshots
+      - VMWare Fusion (free version):
+         - Free
+         - MAC
+         - One VM at a time
+         - No Snapshots
+
+We will use Oracle VirtualBox.
 
 ## VirtualBox
+
+### Deploying VMs
+
+### Multiple VMs
+
+### Networking and Troubleshooting Network
+
+### Snapshots and Restore VMs
 
 ## Vagrant
 
