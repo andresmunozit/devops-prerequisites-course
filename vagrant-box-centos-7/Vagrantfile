@@ -1,0 +1,28 @@
+# A Vagrantfile starts with a configuration block
+Vagrant.configure("2") do |config|
+  # Inside of it the image for the box is specified
+  config.vm.box = "centos/7"
+
+  # For example for configuring port forwarding
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Now let's configure a directory to sync between the host and the VM
+  config.vm.synced_folder "./box_data", "/vagrant_data"
+
+  # We can also configure the timeout in which vagrant waits for this VM to start
+  config.vm.boot_timeout=600
+
+  # For configuring the CPU and memory of the VM you can do it in the config.vm.provider block
+  config.vm.provider "virtualbox" do |vb|
+     vb.memory = "1024"
+     vb.cpus = 2
+     vb.name = "my_centos_vm"
+  end
+
+  # Using the shell provision block, you can also configure a simple shell script to run at boot
+  # up
+  config.vm.provision "shell", inline: <<-SHELL
+     apt-get update
+     apt-get install -y apache 2
+  SHELL
+end

@@ -543,11 +543,222 @@ $ ssh root@192.168.1.2 -p 2222
    - The VMs take an IP address, in the same range as the host machine, so there is Internet
    connectivity
 
-## VirtualBox Multipe VM
-
-### Snapshots and Restore VMs
-
 ## Vagrant
+Vagrant allows to us to create different configurations in VMs with a single `vagrant up` command.
+Examples of VM configuration tasks that Vagrant can carry on:
+- Download
+- Create the VM
+- Create Networks
+- Configure Networking
+- Configure Port Forwarding
+- Boot up VM
+
+Vagrant is usefull when deploying and managing multiple VMs.
+
+A Vagrant Box is a Vagrant term and it refers to a package format of a Vagrant environment. It
+contains an OS image as well as scripts required to configure the environment.
+
+You can find the available Vagrant boxes at
+[https://app.vagrantup.com/boxes/search](https://app.vagrantup.com/boxes/search).
+
+```sh
+$ mkdir vagrant-box-centos-7 && cd $_
+
+# Initialize the Vagrant box in the current directory and creates a Vagrant file, which contains
+# instructions on customizing a box.
+$ vagrant init centos/7
+
+# To get help
+$ vagrant
+Usage: vagrant [options] <command> [<args>]
+
+    -h, --help                       Print this help.
+
+Common commands:
+     autocomplete    manages autocomplete installation on host
+     box             manages boxes: installation, removal, etc.
+     cloud           manages everything related to Vagrant Cloud
+     destroy         stops and deletes all traces of the vagrant machine
+     global-status   outputs status Vagrant environments for this user
+     halt            stops the vagrant machine
+     help            shows the help for a subcommand
+     init            initializes a new Vagrant environment by creating a Vagrantfile
+     login           
+     package         packages a running vagrant environment into a box
+     plugin          manages plugins: install, uninstall, update, etc.
+     port            displays information about guest port mappings
+     powershell      connects to machine via powershell remoting
+     provision       provisions the vagrant machine
+     push            deploys code in this environment to a configured destination
+     rdp             connects to machine via RDP
+     reload          restarts vagrant machine, loads new Vagrantfile configuration
+     resume          resume a suspended vagrant machine
+     serve           start Vagrant server
+     snapshot        manages snapshots: saving, restoring, etc.
+     ssh             connects to machine via SSH
+     ssh-config      outputs OpenSSH valid configuration to connect to the machine
+     status          outputs status of the vagrant machine
+     suspend         suspends the machine
+     up              starts and provisions the vagrant environment
+     upload          upload to machine via communicator
+     validate        validates the Vagrantfile
+     version         prints current and latest Vagrant version
+     winrm           executes commands on a machine via WinRM
+     winrm-config    outputs WinRM configuration to connect to the machine
+
+For help on any individual command run `vagrant COMMAND -h`
+
+Additional subcommands are available, but are either more advanced
+or not commonly used. To see all subcommands, run the command
+`vagrant list-commands`.
+        --[no-]color                 Enable or disable color output
+        --machine-readable           Enable machine readable output
+    -v, --version                    Display Vagrant version
+        --debug                      Enable debug output
+        --timestamp                  Enable timestamps on log output
+        --debug-timestamp            Enable debug output with timestamps
+        --no-tty                     Enable non-interactive output
+
+# To start the Vagrant box run vagrant up
+$ vagrant up
+
+```
+
+### Vagrant File
+When deploying a Vagrantfile in different environments, the result created box and configuration
+will be exactly the same: 
+```Vagrantfile
+# A Vagrantfile starts with a configuration block
+Vagrant.configure("2") do |config|
+   # Inside of it the image for the box is specified
+   config.vm.box = "centos/7"
+
+   # For example for configuring port forwarding
+   config.vm.network "forwarded_port", guest: 80, host: 8080
+
+   # Now let's configure a directory to sync between the host and the VM
+   config.vm.synced_folder "./box_data", "/vagrant_data"
+
+   # For configuring the CPU and memory of the VM you can do it in the config.vm.provider block
+   config.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+   end
+
+   # Using the shell provision block, you can also configure a simple shell script to run at boot
+   # up
+   config.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y apache 2
+   SHELL
+end
+
+```
+
+Before running `vagrant up`, be sure to create and add to gitignore the `box_data` directory, this
+is a custom name nothing standard:
+```sh
+$ mkdir -p 
+
+```
+
+Also to be able to work with folder mounts like the box_data directory, be sure of install the
+`vagrant-vbguest` plugin in the host machine:
+```sh
+$ vagrant plugin install vagrant-vbguest
+
+$ vagrant reload
+
+```
+
+When running the `vagrant up` command now, Vagrant provisions a VM following the specifications
+given in this Vagrant file:
+```sh
+$ vagrant up
+
+```
+
+To use different providers you can use:
+```sh
+$ vagrant up [PROVIDER_NAME]
+
+```
+
+Vagrant supports different providers:
+- VirtualBox
+- VMWare
+- Hyper-V
+- Docker
+- Custom
+
+Once the VM has started we can connect through SSH to the VM using the following command, it also
+automatically authenticates you inside of the VM:
+```sh
+# To connect using SSH
+$ vagrant ssh
+[vagrant@localhost ~]$ cat /etc/*release*
+CentOS Linux release 7.9.2009 (Core)
+Derived from Red Hat Enterprise Linux 7.9 (Source)
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+
+CentOS Linux release 7.9.2009 (Core)
+CentOS Linux release 7.9.2009 (Core)
+cpe:/o:centos:centos:7
+
+```
+
+```sh
+# To check the VM status
+$ vagrant status
+
+# To shut down the VM
+$ vagrant halt
+
+```
+
+Now let's update the Vagrantfile with the following configurations:
+```Vagrantfile
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.synced_folder "./box_data", "/vagrant_data"
+
+  # We can also configure the timeout in which vagrant waits for this VM to start
+  config.vm.boot_timeout=600
+
+config.vm.provider "virtualbox" do |vb|
+    vb.memory = "1024"
+
+    # Let's add the following configuration to set the number of CPUs to 2
+    vb.cpus = 2
+
+    # Let's rename the VM instead of the default name
+    vb.name = "my_centos_vm"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+  apt-get update
+  apt-get install -y apache 2
+  SHELL
+end
+
+```
+
+For these changes to take effect you must run the `vagrant reload` command and wait for it to boot
+up.
 
 ## Linux Networking
 

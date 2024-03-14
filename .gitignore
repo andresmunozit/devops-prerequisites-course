@@ -1,1 +1,8 @@
 tmp/
+
+# Ignore the .vagrant folder; it contains machine-specific information and temporary files used by
+# Vagrant to manage the environment, which are not suitable for version control.
+.vagrant/
+
+## This is a custom name of a directory where the VM data will be synced with the host data
+box_data/
