@@ -73,13 +73,18 @@ snap
 Download files:
 ```
 # Download files from the web
+# -O, --remote-name
+#              Write output to a local file named like the remote file we get.
 $ curl https://es.wikipedia.org/wiki/Wikipedia:Portada -O
-some-file.txt
+$ ll | grep Wikipedia
+-rw-rw-r-- 1 andres andres 106K mar 14 11:25 Wikipedia:Portada
 
 $ tail -2 Wikipedia:Portada
 </body>
 </html>%           
 
+#  -O file
+#      --output-document=file
 $ wget https://es.wikipedia.org/wiki/Wikipedia:Portada -O some-file.txt
 
 $ tail -2 some-file.txt
@@ -132,11 +137,10 @@ $ rpm -q telnet.rpm
 
 ```
 
-Sometimes it's required to query a package, get automatically
-all its dependencies and install them along with the package,
-here is where package managers like `yum` come into play. Yum
-uses `rpm` under the hood to perform all those tasks.
-```
+Sometimes it's required to query a package, get automatically all its dependencies and install them
+along with the package, here is where package managers like `yum` come into play. Yum uses `rpm`
+under the hood to perform all those tasks.
+```sh
 # Install package, it looks at software repositories containing
 # hundreds of thousands of packages
 $ yum install ansible
@@ -154,15 +158,14 @@ $ yum repolist
 # Shows the files where those repos are configured
 $ ls /etc/yum.repos.d/
 
-# Inside of each file you can find the URL of the locations
-# where all packages are stored, this is how yum find the packages
+# Inside of each file you can find the URL of the locations where all packages are stored, this is
+# how yum find the packages
 $ cat /etc/yum.repos.d/CentOS-Base.repo
 
-# Accessing to the URL we can see a list of URLs where packages
-# are download from, it normally contains older versions of
-# the packages, like ansible. The instructios for updating the
-# URL to the lastest ansible install URL you can follow the
-# instructions provided at the ansible site.
+# Accessing to the URL we can see a list of URLs where packages are download from, it normally
+# contains older versions of the packages, like ansible. The instructios for updating the
+# URL to the lastest ansible install URL you can follow thes instructions provided at the ansible
+# site.
 $ yum list ansible
 Installed Packages
 ansible.noarch          2.9.6-1.e17             @epel
@@ -170,10 +173,9 @@ ansible.noarch          2.9.6-1.e17             @epel
 # Remove package
 $ yum remove ansible
 
-# To list all available versions of a package, use the
-# --showduplicates option. In the following code output we can
-# see two different versions of the ansible package, from 
-# different repositories, the `extras` repo and the `epel` repo.
+# To list all available versions of a package, use the --showduplicates option. In the following
+# code output we can see two different versions of the ansible package, from different repositories,
+# the `extras` repo and the `epel` repo.
 $ yum --showduplicates list ansible
 Available Packages
 ansible.noarch              2.4.2.0-2.el7              extras
@@ -188,13 +190,12 @@ $ yum install ansible-2.4.2.0
 ### Service Management
 Services run in the background all the time automatically even after a service reboot. Also they
 must follow the right order to startup:
-```
+```sh
 # To start a service, in this case the HTTPD service
 $ service httpd start
 
-# The previous `service` command uses systemctl underneath,
-# so we're going to focus in the systemctl command for the
-# rest of the course
+# The previous `service` command uses systemctl underneath, so we're going to focus in the systemctl
+# command for the rest of the course
 $ systemctl start httpd
 
 # To stop a running service
@@ -212,14 +213,13 @@ $ systemctl disable httpd
 ```
 
 Configuring a program as a service:
-```
-# Create the application that we want to make a service
-# In this case it's a python web server, the command to run this
-# web server would be:
+```sh
+# Create the application that we want to make a service. In this case it's a python web server, the
+# command to run this web server would be:
 $ /usr/bin/python3 /opt/code/my_app.py
 
-# To configure our program as a systemd service, we need a 
-# systemd unit file. It may be located at `/etc/systemd/system`
+# To configure our program as a systemd service, we need a systemd unit file. It may be located at
+# `/etc/systemd/system`
 $ cd /etc/systemd/system
 
 # The file must be named after the name that we want to use for
@@ -261,12 +261,10 @@ $ systemctl stop my_app
 
 Now let's configure it to automatically run when the system boots
 up:
-```
-# The unit configuration file has another sections that can be
-# configured.
-# The [Install] section will configure this service to run after
-# a particular service that runs at boot up. So this service
-# will run after the multi-user.target run level started.
+```sh
+# The unit configuration file has another sections that can be configured.
+# The [Install] section will configure this service to run after a particular service that runs at
+# boot up. So this service will run after the multi-user.target run level started.
 $ vim my_app.service
 [Service]
 ExecStart=/usr/bin/python3 /opt/code/my_app.py
@@ -289,12 +287,10 @@ ExecStart=/usr/bin/python3 /opt/code/my_app.py
 [Install]
 WantedBy=multi-user.target
 
-# If the application has other dependencies as commands or scripts
-# that are to be run before starting the applicaton of after
-# starting the application, add the `ExecStartPre` and/or the
+# If the application has other dependencies as commands or scripts that are to be run before
+# starting the applicaton of after starting the application, add the `ExecStartPre` and/or the
 # `ExecStartPost` directives.
-# For automatically restart the application in case it crashes,
-# use the `Restart` directive
+# For automatically restart the application in case it crashes, use the `Restart` directive
 $ vim my_app.service
 [Unit]
 Description=My python web application
@@ -311,7 +307,7 @@ WantedBy=multi-user.target
 ```
 
 Example of the Service Unit File for Docker:
-```
+```sh
 $ sudo cat /lib/systemd/system/docker.service 
 [sudo] password for andres: 
 [Unit]
