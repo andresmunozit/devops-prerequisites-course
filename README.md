@@ -399,7 +399,7 @@ yy
 # Pasting
 p
 
-# For mioving the page (scrolling) up or down
+# For moving the page (scrolling) up or down
 CTRL+u ; CTRL+d
 
 # For getting the command prompt
@@ -476,12 +476,74 @@ amount of VMs, so they have high resource requirements.
 We will use Oracle VirtualBox.
 
 ## VirtualBox
+- Support
+   - Windows, MAC OS, Linux, Solaris.
+- Resource Requirement:
+   - CPU: x86 Intel or AMD
+   - Memory: 512MB
+   - Disk space: 30MB
+- Recommended Resources:
+   - CPU: Dual or Quadcore
+   - Memory: 4GB
+   - Disk space: 100GB
 
-### Deploying VMs
+### Getting Preconfigured OS Virtual Disks
+OSBoxes
 
-### Multiple VMs
+### VM Start Type
+- Normal Start: GUI or VM console will be shown, when the console is closed the VM should be
+suspended
+- Headless Start: Only accessible using SSH, can run in the background
+- Detached Start: Normal mode that doesn't require os suspend the VM when closing the console
+
+In order to connect to SSH the VM has to have SSH enabled and have an IP address assigned:
+```sh
+# In a CentOs machine
+$ ip addr show
+
+# To set the ip address
+$ ip addr add 192.168.1.10/24 dev eth0
+
+# To check the ssh service
+$ sudo systemctl status sshd      
+● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/lib/systemd/system/ssh.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2024-03-14 12:31:52 -05; 1h 3min ago
+       Docs: man:sshd(8)
+             man:sshd_config(5)
+    Process: 1166 ExecStartPre=/usr/sbin/sshd -t (code=exited, status=0/SUCCESS)
+   Main PID: 1180 (sshd)
+      Tasks: 1 (limit: 38054)
+     Memory: 3.2M
+        CPU: 13ms
+     CGroup: /system.slice/ssh.service
+             └─1180 "sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
+
+```
+
+For connecting to a VM using SSH, in this example the VM is listening on port 2222:
+```sh
+$ ssh root@192.168.1.2 -p 2222
+
+```
 
 ### Networking and Troubleshooting Network
+- Host-Only Network
+   - You can create a Host-Only Network in the Host Network Manager
+   - A network for internal VM interconnectivity only, there is not internet connectivity, but it's
+   possible with IP Forwarding
+   - You can attachh a VM adapter to an internal network in the adapter configuration section
+   - The VMs cannot access the outside world
+- NAT (Address Translation)
+   - The VMs can access the outside world so there is Internet connectivity
+   - No systems on the outside world can access to the VMs inside
+   - NAT doesn't allow inter VM communication, a NAT network will support it
+   - Support Port Forwardding
+- Bridge
+   - The VMs take an IP address, in the same range as the host machine, so there is Internet
+   connectivity
+
+## VirtualBox Multipe VM
 
 ### Snapshots and Restore VMs
 
