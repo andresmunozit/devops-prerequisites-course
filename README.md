@@ -1,5 +1,6 @@
 # DevOps Prerequisites Course
-A course for taking before other DevOps courses.
+A course for taking before other DevOps courses. These are the notes of the following minicourse
+[DevOps Prerequisites Course - Getting started with DevOps](https://www.youtube.com/watch?v=Wvf0mBNGjXY&t=2987s).
 
 ## LINUX BASICS
 ### Linux CLI
@@ -761,5 +762,39 @@ For these changes to take effect you must run the `vagrant reload` command and w
 up.
 
 ## Linux Networking
+### DNS
+Useful commands:
+```sh
+# DNS
+$ nslookup
+
+$ dig
+
+# Routing
+$ ip route
+
+# List and modify interfaces
+$ ip link
+
+# List addresses assigned to the different interfaces
+$ ip addr
+
+# Set ip addresses on the interfaces, valid until restart, to persist edit /etc/network/interfaces
+$ ip addr add 192.168.1.10/24 dev eth0
+
+# View the routing table
+$ ip route
+
+# Add entries into the routing table
+$ ip route add 192.168.1.0/24 via 192.168.2.1
+
+# Check if IP forward is enabled in a host is
+$ cat /proc/sys/net/ipv4/ip_forward
+
+```
+
+When pointing to 
 
 ## JSON/YAML
+- Dictionary: Unordered
+- List: Ordered
